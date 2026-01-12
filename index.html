@@ -18,6 +18,7 @@
         * { box-sizing: border-box; touch-action: pan-y; outline: none; }
         body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: var(--txt); -webkit-tap-highlight-color: transparent; overflow: hidden; transition: background 0.3s; }
         
+        /* Restore Design */
         header { background: var(--card); padding: 1rem; font-weight: 800; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 100; }
         .live-indicator { font-size: 0.65rem; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 900; }
         .tag-f { background: #dbeafe; color: var(--p); }
@@ -33,11 +34,13 @@
 
         label { font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; padding-left: 4px; }
         input, select, textarea { width: 100%; padding: 14px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--bg); color: var(--txt); font-size: 1rem; margin-bottom: 15px; transition: 0.2s; }
-
+        
         #timerDisplay { font-size: 4.5rem; font-weight: 800; text-align: center; margin: 10px 0; font-family: 'Courier New', monospace; letter-spacing: -2px; }
-        .btn-p { background: var(--p); color: #fff; width: 100%; padding: 18px; border: none; border-radius: 20px; font-weight: 800; font-size: 1.1rem; cursor: pointer; }
+        .btn-p { background: var(--p); color: #fff; width: 100%; padding: 18px; border: none; border-radius: 20px; font-weight: 800; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-p:active { transform: scale(0.98); }
+        
         .progress { width: 100%; height: 12px; background: #eee; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
-        #bar { width: 0%; height: 100%; background: var(--p); transition: 0.5s linear; }
+        #bar { width: 0%; height: 100%; background: var(--p); transition: 0.2s linear; }
 
         .full-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 1000; display: none; flex-direction: column; padding: 2rem; overflow-y: auto; }
         .active-modal { display: flex; }
@@ -46,39 +49,57 @@
         .fade-out { opacity: 0; pointer-events: none; transition: 0.6s; }
     </style>
 </head>
-<body>
+<body class="light">
 
 <header>
     <div style="display:flex; align-items:center; gap:10px;">
-        <span>ReFocus</span>
+        <span style="letter-spacing:-0.5px;">ReFocus</span>
         <span id="navTag" class="live-indicator tag-off">Offline</span>
     </div>
-    <button style="background:var(--bg); border:none; width:40px; height:40px; border-radius:12px;" onclick="openSets()">⚙️</button>
+    <button style="background:var(--bg); border:none; width:40px; height:40px; border-radius:12px; cursor:pointer;" onclick="openSets()">⚙️</button>
 </header>
 
 <div id="welcomeOverlay">
     <div style="text-align:center;">
         <h1 style="font-size:5rem; margin:0;">🎯</h1>
-        <h2>Welcome Back, Jerick</h2>
+        <h2 style="font-size:1.8rem; font-weight:800;">Welcome Back, Jerick</h2>
     </div>
 </div>
 
-<div id="lockScreen" class="full-overlay">
-    <div style="text-align:center; margin-top: 20%;">
-        <div style="font-size:4rem;">🛡️</div>
-        <h2>App Locked</h2>
-        <input type="password" id="pinIn" placeholder="••••" style="text-align:center; font-size:2rem;">
+<div id="lockScreen" class="full-overlay" style="display:flex; justify-content:center; align-items:center;">
+    <div style="text-align:center; width:100%; max-width:300px;">
+        <div style="font-size:4rem; margin-bottom:1rem;">🛡️</div>
+        <h2 style="font-weight:800;">App Locked</h2>
+        <input type="password" id="pinIn" placeholder="••••" style="text-align:center; font-size:2rem; letter-spacing:10px;">
         <button class="btn-p" onclick="unlock()" style="width:100%">Unlock Access</button>
     </div>
 </div>
 
 <div id="setMod" class="full-overlay">
-    <h2>Settings <button onclick="closeSets()" style="float:right; background:none; border:none; color:var(--txt)">✕</button></h2>
-    <div class="section">
-        <label>Appearance</label>
-        <button class="btn-p" onclick="toggleDark()">Toggle Dark Mode</button>
+    <div style="max-width:450px; margin:auto; width:100%;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+            <h2 style="margin:0; font-weight:800;">Settings</h2>
+            <button onclick="closeSets()" style="background:var(--border); border:none; width:35px; height:35px; border-radius:50%; font-weight:bold;">✕</button>
+        </div>
+        
+        <div class="section">
+            <label>Appearance</label>
+            <button class="btn-p" style="background:var(--txt); color:var(--card);" onclick="toggleDark()">Toggle Dark Mode</button>
+        </div>
+
+        <div class="section">
+            <label>Alarm Sound</label>
+            <select id="alarmSelect" onchange="saveAlarmPref()">
+                <option value="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg">Digital Watch</option>
+                <option value="https://actions.google.com/sounds/v1/alarms/mechanical_clock_ring.ogg">Mechanical Bell</option>
+                <option value="https://actions.google.com/sounds/v1/clocks/alarm_clock_elapsed.ogg">Soft Chimes</option>
+            </select>
+            <label>Volume: <span id="volVal">80%</span></label>
+            <input type="range" id="vol" min="0" max="1" step="0.1" value="0.8" oninput="updateVolUI()">
+        </div>
+        
+        <div id="secArea" class="section"></div>
     </div>
-    <div id="secArea" class="section"></div>
 </div>
 
 <div class="container" id="mainSwiper">
@@ -91,28 +112,29 @@
     <div id="tab1">
         <div class="section">
             <label>Task</label>
-            <input id="taskName" placeholder="What are you doing?">
-            <div style="display:flex; gap:10px;">
-                <input type="number" id="fM" value="25">
-                <input type="number" id="rM" value="5">
+            <input id="taskName" placeholder="e.g. Study SEC Regulations">
+            <div style="display:flex; gap:15px;">
+                <div style="flex:1"><label>Focus (Min)</label><input type="number" id="fM" value="25"></div>
+                <div style="flex:1"><label>Rest (Min)</label><input type="number" id="rM" value="5"></div>
             </div>
             <div id="timerDisplay">00:00:00</div>
             <div class="progress"><div id="bar"></div></div>
             <button class="btn-p" id="startBtn" onclick="start()" style="width:100%">Start Session</button>
-            <button onclick="reset()" style="width:100%; border:none; background:none; color:var(--d); margin-top:10px;">Reset</button>
+            <button onclick="reset()" style="width:100%; border:none; background:none; margin-top:15px; font-weight:bold; color:var(--d); cursor:pointer;">Reset Timer</button>
         </div>
     </div>
 
     <div id="tab2" style="display:none;">
         <div class="section">
             <label>Daily Journal</label>
-            <textarea id="noteIn" rows="6"></textarea>
-            <button class="btn-p" onclick="saveNote()" style="width:100%">Save Note</button>
+            <textarea id="noteIn" rows="6" placeholder="Session notes..."></textarea>
+            <button class="btn-p" onclick="saveNote()" style="width:100%">Save to Records</button>
         </div>
     </div>
 
     <div id="tab3" style="display:none;">
         <div class="section">
+            <label>Select Date</label>
             <input type="date" id="cal" onchange="loadData()">
             <div id="workList"></div>
         </div>
@@ -120,51 +142,35 @@
 </div>
 
 <script>
-    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
-
-    // --- MEMORY SYSTEMS ---
     let pin = localStorage.getItem('rf_pin') || "";
     let isDark = localStorage.getItem('rf_dark') === 'true';
-    let db = JSON.parse(localStorage.getItem('rf_v21')) || { logs: {}, notes: {} };
+    let alarmSrc = localStorage.getItem('rf_alarm') || "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg";
+    let audio = new Audio(alarmSrc); audio.loop = true;
 
-    // --- STATE ---
     let time = 0, max = 0, isFocus = true, running = false;
-    let endTime = localStorage.getItem('rf_endTime');
+    let timerInterval;
 
-    // Initialize App
     window.onload = () => {
-        if(isDark) document.body.classList.add('dark');
+        if(isDark) document.body.className = 'dark';
+        document.getElementById('alarmSelect').value = alarmSrc;
         updateSecUI();
-        checkPersistence();
+        checkBackgroundSession();
         if(!pin) document.getElementById('lockScreen').style.display='none';
     };
 
-    // 1. PERSISTENCE FIX (Run in background)
-    function checkPersistence() {
+    // --- BACKGROUND PERSISTENCE ---
+    function checkBackgroundSession() {
+        let endTime = localStorage.getItem('rf_endTime');
         if (endTime) {
-            let now = Date.now();
-            let remaining = Math.floor((endTime - now) / 1000);
-            if (remaining > 0) {
-                time = remaining;
+            let diff = Math.floor((endTime - Date.now()) / 1000);
+            if (diff > 0) {
+                time = diff;
                 max = localStorage.getItem('rf_max');
-                running = true;
                 isFocus = localStorage.getItem('rf_isFocus') === 'true';
-                document.getElementById('startBtn').disabled = true;
-                tick();
+                resumeTimer();
             } else {
                 localStorage.removeItem('rf_endTime');
             }
-        }
-    }
-
-    function tick() {
-        if (time > 0 && running) {
-            updateUI();
-            time--;
-            setTimeout(tick, 1000);
-        } else if (running) {
-            alert("Session Complete!");
-            reset();
         }
     }
 
@@ -173,25 +179,35 @@
         let mins = isFocus ? document.getElementById('fM').value : document.getElementById('rM').value;
         time = mins * 60;
         max = time;
-        running = true;
-        
-        // Save to memory so it "runs" while app is closed
-        endTime = Date.now() + (time * 1000);
-        localStorage.setItem('rf_endTime', endTime);
+        resumeTimer();
+        localStorage.setItem('rf_endTime', Date.now() + (time * 1000));
         localStorage.setItem('rf_max', max);
         localStorage.setItem('rf_isFocus', isFocus);
-
-        document.getElementById('startBtn').disabled = true;
-        tick();
     }
 
-    // 2. PASSWORD DISABLE FIX
+    function resumeTimer() {
+        running = true;
+        document.getElementById('startBtn').disabled = true;
+        timerInterval = setInterval(() => {
+            if(time > 0) {
+                time--;
+                updateUI();
+            } else {
+                clearInterval(timerInterval);
+                audio.play();
+                alert("Session Finished!");
+                reset();
+            }
+        }, 1000);
+    }
+
+    // --- SECURITY RESTORED ---
     function updateSecUI() {
         const area = document.getElementById('secArea');
         if(!pin) {
-            area.innerHTML = `<label>Security</label><input id="np" type="password" placeholder="New PIN"><button class="btn-p" onclick="setPin()" style="width:100%">Enable Lock</button>`;
+            area.innerHTML = `<label>Setup Security</label><input id="np" type="password" placeholder="New PIN"><button class="btn-p" onclick="setPin()">Enable Lock</button>`;
         } else {
-            area.innerHTML = `<label>Security</label><button onclick="delPin()" style="width:100%; padding:15px; border-radius:15px; background:var(--d); color:white; border:none;">Disable Password</button>`;
+            area.innerHTML = `<label>Manage Security</label><button onclick="delPin()" style="width:100%; padding:18px; border-radius:20px; background:var(--d); color:white; border:none; font-weight:800;">Disable Security</button>`;
         }
     }
 
@@ -201,7 +217,8 @@
     }
 
     function delPin() {
-        if(confirm("Remove password?")) {
+        let confirmDel = confirm("Disable password protection?");
+        if(confirmDel) {
             pin = "";
             localStorage.removeItem('rf_pin');
             updateSecUI();
@@ -212,25 +229,38 @@
         if(document.getElementById('pinIn').value === pin) {
             document.getElementById('lockScreen').classList.add('fade-out');
             document.getElementById('welcomeOverlay').style.display = 'flex';
-            setTimeout(() => { document.getElementById('welcomeOverlay').classList.add('fade-out'); }, 1000);
-        } else { alert("Wrong PIN"); }
+            setTimeout(() => { document.getElementById('welcomeOverlay').style.display = 'none'; }, 2000);
+        } else { alert("Incorrect PIN"); }
     }
 
-    // 3. DARK MODE FIX
+    // --- SETTINGS & ALARM ---
     function toggleDark() {
         isDark = !isDark;
-        document.body.classList.toggle('dark');
+        document.body.className = isDark ? 'dark' : 'light';
         localStorage.setItem('rf_dark', isDark);
     }
 
-    // --- GENERAL UI ---
+    function saveAlarmPref() {
+        alarmSrc = document.getElementById('alarmSelect').value;
+        localStorage.setItem('rf_alarm', alarmSrc);
+        audio.src = alarmSrc;
+    }
+
+    function updateVolUI() {
+        let v = document.getElementById('vol').value;
+        document.getElementById('volVal').innerText = Math.round(v * 100) + "%";
+        audio.volume = v;
+    }
+
     function updateUI() {
         let m = Math.floor(time/60), s = time%60;
         document.getElementById('timerDisplay').innerText = `00:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         document.getElementById('bar').style.width = ((max-time)/max*100) + "%";
+        document.getElementById('navTag').innerText = running ? (isFocus ? "Focusing" : "Resting") : "Offline";
     }
 
     function reset() {
+        clearInterval(timerInterval);
         running = false;
         time = 0;
         localStorage.removeItem('rf_endTime');
@@ -242,6 +272,7 @@
         document.getElementById('tab1').style.display = n===1?'block':'none';
         document.getElementById('tab2').style.display = n===2?'block':'none';
         document.getElementById('tab3').style.display = n===3?'block':'none';
+        document.querySelectorAll('.tabs button').forEach((b,i) => b.className = (i+1===n)?'active':'');
     }
 
     function openSets() { document.getElementById('setMod').classList.add('active-modal'); }
