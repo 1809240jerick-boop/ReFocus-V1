@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ReFocus Pro - SEC JERICK</title>
 
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ReFocus">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
     <meta name="theme-color" content="#2563eb">
 
     <style>
@@ -178,6 +178,11 @@
 </div>
 
 <script>
+    // Register Service Worker to enable PWA Installation
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
+    }
+
     const blob = new Blob([`let t=null; self.onmessage=e=>{if(e.data==='s'){t=setInterval(()=>self.postMessage('k'),1000)}else{clearInterval(t)}};`],{type:'text/javascript'});
     const worker = new Worker(URL.createObjectURL(blob));
 
