@@ -1,8 +1,10 @@
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open('refocus-v1').then((cache) => cache.addAll([
-      'index.html',
-      'manifest.json'
+    caches.open('refocus-v2').then((cache) => cache.addAll([
+      './',
+      './index.html',
+      './manifest.json',
+      './icon-192.png'
     ]))
   );
 });
